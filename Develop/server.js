@@ -63,19 +63,42 @@ app.post("/api/notes", (req, res) => {
   });
 });
 
-/* fs.readFile("./db/db.json", "utf8", (err, data) => {
+app.delete("/api/notes/:id", (req, res) => {
+  fs.readFile("./db/db.json", "utf8", (err, data) => {
     if (err) {
       console.error(err);
     } else {
-      const updatedNotes = JSON.parse(data);
-      updatedNotes.push(newNote);
-      // (updatedNotes, null, 4)
-      fs.writeFile("./db/db.json", JSON.stringify(updatedNotes));
-      return res.status(201).json("success");
+      let notes = JSON.parse(data);
+      for (let i = 0; i < notes.length; i++) {
+        if (req.params.id === notes[i].id) {
+          notes.splice(i, 1);
+        }
+      }
+
+      fs.writeFile(
+        "./db/db.json",
+        JSON.stringify(notes, null, 4),
+        (writeErr) => {
+          let response;
+          if (writeErr) {
+            console.error(writeErr);
+            response = {
+              status: "error",
+              message: "Failed to delete note",
+            };
+          } else {
+            response = {
+              status: "success",
+              message: "Successfully deleted note",
+            };
+            console.info("Successfully deleted note!");
+            return res.status(201).json(response);
+          }
+        }
+      );
     }
   });
-}); */
-app.delete("/api/notes/:id", (req, res) => {});
+});
 // ======
 app.listen(PORT, () =>
   console.log(`Express server listening on port ${PORT}!`)
